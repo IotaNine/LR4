@@ -1,77 +1,176 @@
-#include <iostream>
-#include <vector>
+﻿#include <iostream>
 #include <ctime>
+#include <vector>
 #include <cmath>
 
-void Filler1(std::vector<int>& vec, int n){
-    std::srand(std::time(nullptr));
-    for (int i = 0; i <= n; i++){
+void Fill(std::vector<int> &vec)
+{
+    for (int i = 0; i < 32; i++) {
         vec.push_back(rand() % 201 - 100);
-        std::cout<<vec[i]<<" ";
+        std::cout << vec[i] << " ";
     }
-    std::cout<<std::endl;
+    std::cout << std::endl<< "Вектор готов" << std::endl;
 }
 
-void Filler2(std::vector<int>& vec){
-    std::srand(std::time(nullptr));
-    int m, b;
-    m = rand() % 6 + 30;
-    b = rand() % 31;
-
-}
-
-void CocktailSort(std::vector<int>& vec){
+void CocktailSort(std::vector<int> &vec) 
+{
     int L = 0;
     int R = vec.size() - 1;
-    int A;
-    do{
-        for (int i = L; i < R; i++){
-            if (vec[i] > vec[i+1]){
-                A = vec[i];
-                vec[i] = vec[i+1];
-                vec[i+1] = A;
+    int sorted = 0;
+    do {
+        for (int i = L; i < R; i++) 
+        {
+            if (vec[i] > vec[i + 1]) 
+            {
+                std::swap(vec[i], vec[i + 1]);
+                sorted = i;
             }
         }
-        R--;
-        for (int i = R; i > L; i--){
-            if(vec[i] < vec[i-1]){
-                A = vec[i];
-                vec[i] = vec[i-1];
-                vec[i-1] = vec[i];
+        R = sorted;
+        for (int i = R; i > L; i--) 
+        {
+            if (vec[i] < vec[i - 1]) 
+            {
+                std::swap(vec[i], vec[i - 1]);
+                sorted = i;
             }
 
         }
-        L++;
+        L = sorted;
     } while (L < R);
 
 }
 
-void MergeSort{
-
+void Compose(std::vector<int> &L, std::vector<int> &R, std::vector<int> &vec) //for Merge sort
+{
+    int sL = L.size();
+    int sR = R.size();
+    int i = 0;
+    int j = 0;
+    int k = 0;
+    while (sL > i and sR > j)
+    {
+        if (L[i] < R[j])
+        {
+            vec[k] = L[i];
+            i++;
+        }
+        else
+        {
+            vec[k] = R[j];
+            j++;
+        }
+        k++;
+    }
+    while (sL > i)
+    {
+        vec[k] = L[i];
+        i++;
+        k++;
+    }
+    while (sR > j)
+    {
+        vec[k] = R[j];
+        i++;
+        j++;
+    }
 }
 
-void BitonicSort{
-
+void MergeSort(std::vector<int> &vec)
+{
+    std::vector<int> L;
+    std::vector<int> R;
+    int m = vec.size() / 2;
+    if (vec.size() >= 2)
+    {
+        for (int i = 0; i < m; i++)
+        {
+            L.push_back(vec[i]);
+        }
+        for (int i = m; i < vec.size(); i++)
+        {
+            R.push_back(vec[i]);
+        }
+    }
+    else
+    {
+        return;
+    }
+    MergeSort(L);
+    MergeSort(R);
+    Compose(L, R, vec);
 }
 
-int main(){
+void BitonicMerge(std::vector<int> &vec, int begin, int size, bool direction)
+{
+    // direction = 1 if ascends, direction = 0 if descends
+    if (size > 1)
+    {
+        int m = size / 2;
+        for (int i = begin; i < begin + m; i++)
+        {
+            if (direction == (vec[i] > vec[i + m])) std::swap(vec[i], vec[i + m]);
+        }
+        BitonicMerge(vec, begin, m, direction);
+        BitonicMerge(vec, begin + m, m, direction);
+    }
+}
+
+void BitonicS(std::vector<int> &vec, int begin, int size, bool direction)
+{
+    if (size > 1)
+    {
+        int m = size / 2;
+        BitonicS(vec, begin, m, 1);
+        BitonicS(vec, begin + m, m, 0);
+        BitonicMerge(vec, begin, size, direction);
+    }
+}
+
+void BitonicSort(std::vector<int> &vec, int begin, int size, bool direction)
+{
+    bool even = true;
+    int end;
+    if (vec.size() % 2 != 0)
+    {
+        even = false;
+        end = vec.back();
+        vec.pop_back();
+    }
+    BitonicS(vec, begin, vec.size(), direction);
+    if (!even)
+    {
+        for (int i = 0; i < vec.size(); i++)
+        {
+            if ((vec[i] > end and vec[i + 1] < end) || (vec[i] < end and vec[i + 1] > end))
+            {
+                vec.insert(vec.begin() + i, end);
+                break;
+            }
+        }
+    }
+}
+
+int main() {
+    setlocale(LC_ALL, "Russian");
+    std::srand(std::time(nullptr));
     int x, n;
+    bool direction = true; //ascends
     std::vector<int> vec1;
-    std::cout<<"Choose sort(1, 2 or 3): "<<std::endl;
-    std::cin>>x;
-    switch (x){
-        case 1:
-            std::cout<<"Enter n (n >= 30): "<<std::endl;
-            std::cin>>n;
-            Filler1(vec1, n);
-            CocktailSort(vec1);
-        case 2:
-            MergeSort(vec1);
-        case 3:
-            BitonicSort(vec1);
+    std::cout << "Выберите задание (1, 2 или 3): ";
+    std::cin >> x;
+    Fill(vec1);
+    switch (x) {
+    case 1:
+        CocktailSort(vec1);
+        break;
+    case 2:
+        MergeSort(vec1);
+        break;
+    case 3:
+        BitonicSort(vec1, 0, vec1.size(), direction);
+        break;
     }
-    for (int i = 0; i < vec1.size(); i++) {
-        std::cout<<vec1[i]<<" ";
-    }
+    for (int i : vec1 ) std::cout << i << " ";
+    std::cout << std::endl << "Вектор отсортирован";
 }
-
